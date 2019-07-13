@@ -18,9 +18,6 @@ class MeetupController {
       where.date = {
         [Op.between]: [startOfDay(searchDate), endOfDay(searchDate)],
       };
-
-      console.log(startOfDay(searchDate));
-      console.log(endOfDay(searchDate));
     }
 
     const meetups = await Meetup.findAll({
