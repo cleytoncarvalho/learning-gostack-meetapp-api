@@ -7,9 +7,7 @@ import User from '../models/User';
 
 class MeetupController {
   async index(req, res) {
-    const where = {
-      user_id: req.userId,
-    };
+    const where = {};
     const page = req.query.page || 1;
 
     if (req.query.date) {
@@ -52,7 +50,7 @@ class MeetupController {
     if (isBefore(parse(req.body.date), new Date())) {
       return res
         .status(400)
-        .json({ error: "Meetup date can't be in the past." });
+        .json({ error: "Meetup date can't be in the past" });
     }
 
     const user_id = req.userId;
@@ -83,21 +81,21 @@ class MeetupController {
     const meetup = await Meetup.findByPk(req.params.id);
 
     if (!meetup) {
-      return res.status(404).json({ error: 'Meetup not found.' });
+      return res.status(404).json({ error: 'Meetup not found' });
     }
 
     if (meetup.user_id !== user_id) {
-      return res.status(401).json({ error: 'Not authorized.' });
+      return res.status(401).json({ error: 'Not authorized' });
     }
 
     if (isBefore(parse(req.body.date), new Date())) {
       return res
         .status(400)
-        .json({ error: "Meetup date can't be in the past." });
+        .json({ error: "Meetup date can't be in the past" });
     }
 
     if (meetup.past) {
-      return res.status(400).json({ error: "Can't update past meetups." });
+      return res.status(400).json({ error: "Can't update past meetups" });
     }
 
     await meetup.update(req.body);
@@ -111,15 +109,15 @@ class MeetupController {
     const meetup = await Meetup.findByPk(req.params.id);
 
     if (!meetup) {
-      return res.status(404).json({ error: 'Meetup not found.' });
+      return res.status(404).json({ error: 'Meetup not found' });
     }
 
     if (meetup.user_id !== user_id) {
-      return res.status(401).json({ error: 'Not authorized.' });
+      return res.status(401).json({ error: 'Not authorized' });
     }
 
     if (meetup.past) {
-      return res.status(400).json({ error: "Can't delete past meetups." });
+      return res.status(400).json({ error: "Can't delete past meetups" });
     }
 
     await meetup.destroy();
