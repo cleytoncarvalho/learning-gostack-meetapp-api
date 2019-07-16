@@ -3,13 +3,28 @@
 
 import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
+import User from '../models/User';
+
+import Queue from '../../lib/Queue';
+import SubscriptionMail from '../jobs/SubscriptionMail';
 
 class SubscriptionController {
   async store(req, res) {
-    const user_id = req.userId;
-    const meetup = await Meetup.findByPk(req.params.id);
+    const user = await User.findByPk(req.userId);
+    const meetup = await Meetup.findByPk(req.params.id, {
+      include: [
+        {
+          model: User,
+          attributes: ['name', 'email'],
+        },
+      ],
+    });
 
-    if (meetup.user_id === user_id) {
+    if (!meetup) {
+      return res.status(404).json({ error: 'Meetup not found' });
+    }
+
+    if (meetup.user_id === user.id) {
       return res
         .status(401)
         .json({ error: "Can't subscribe to your own meetups" });
@@ -22,7 +37,7 @@ class SubscriptionController {
     const checkAlreadySubscribed = await Subscription.findOne({
       where: {
         meetup_id: meetup.id,
-        user_id,
+        user_id: user.id,
       },
     });
 
@@ -34,7 +49,7 @@ class SubscriptionController {
 
     const checkSameDate = await Subscription.findOne({
       where: {
-        user_id,
+        user_id: user.id,
       },
       include: [
         {
@@ -55,7 +70,12 @@ class SubscriptionController {
 
     const subscription = await Subscription.create({
       meetup_id: meetup.id,
-      user_id,
+      user_id: user.id,
+    });
+
+    await Queue.add(SubscriptionMail.key, {
+      meetup,
+      user,
     });
 
     return res.json(subscription);

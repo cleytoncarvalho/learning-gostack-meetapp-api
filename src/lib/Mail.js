@@ -1,5 +1,7 @@
 import nodemailer from 'nodemailer';
-// import { resolve } from 'path';
+import { resolve } from 'path';
+import hbs from 'nodemailer-express-handlebars';
+import exphbs from 'express-handlebars';
 import mailConfig from '../config/mail';
 
 class Mail {
@@ -17,20 +19,20 @@ class Mail {
   }
 
   configureTemplate() {
-    // const viewPath = resolve(__dirname, '..', 'app', 'views', 'emails');
-    // this.transporter.use(
-    //   'compile',
-    //   hbs({
-    //     viewEngine: exphbs.create({
-    //       layoutsDir: resolve(viewPath, 'layouts'),
-    //       partialsDir: resolve(viewPath, 'partials'),
-    //       defaultLayout: 'default',
-    //       extname: '.hbs',
-    //     }),
-    //     viewPath,
-    //     extName: '.hbs',
-    //   })
-    // );
+    const viewPath = resolve(__dirname, '..', 'app', 'views', 'emails');
+    this.transporter.use(
+      'compile',
+      hbs({
+        viewEngine: exphbs.create({
+          layoutsDir: resolve(viewPath, 'layouts'),
+          partialsDir: resolve(viewPath, 'partials'),
+          defaultLayout: 'default',
+          extname: '.hbs',
+        }),
+        viewPath,
+        extName: '.hbs',
+      })
+    );
   }
 
   sendMail(message) {
