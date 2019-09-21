@@ -10,7 +10,10 @@ class OrganizingController {
 
   async show(req, res) {
     const meetups = await Meetup.findOne({
-      where: { user_id: req.userId },
+      where: {
+        id: req.params.id,
+        user_id: req.userId,
+      },
       include: [
         {
           model: File,
