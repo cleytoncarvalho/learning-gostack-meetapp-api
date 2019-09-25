@@ -3,7 +3,10 @@ import File from '../models/File';
 
 class OrganizingController {
   async index(req, res) {
-    const meetups = await Meetup.findAll({ where: { user_id: req.userId } });
+    const meetups = await Meetup.findAll({
+      where: { user_id: req.userId },
+      order: [['date', 'ASC']],
+    });
 
     return res.json(meetups);
   }
@@ -18,7 +21,7 @@ class OrganizingController {
         {
           model: File,
           as: 'cover',
-          attributes: ['path', 'url'],
+          attributes: ['id', 'path', 'url'],
         },
       ],
     });
