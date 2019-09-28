@@ -9,6 +9,7 @@ class MeetupController {
   async index(req, res) {
     const where = {};
     const page = req.query.page || 1;
+    const per_page = req.query.per_page || 10;
 
     if (req.query.date) {
       const searchDate = parse(req.query.date);
@@ -18,6 +19,11 @@ class MeetupController {
       };
     }
 
+    const totalMeetups = await Meetup.count({ where });
+
+    const totalPages =
+      totalMeetups > per_page ? Math.ceil(totalMeetups / per_page) : 1;
+
     const meetups = await Meetup.findAll({
       where,
       include: [
@@ -26,12 +32,18 @@ class MeetupController {
           attributes: ['id', 'name', 'email'],
         },
       ],
-      limit: 10,
-      offset: 10 * page - 10,
+      limit: per_page,
+      offset: per_page * page - per_page,
       order: [['date', 'DESC']],
     });
 
-    return res.json(meetups);
+    return res.json({
+      meetups,
+      pagination: {
+        pages: totalPages,
+        total: totalMeetups,
+      },
+    });
   }
 
   async store(req, res) {
