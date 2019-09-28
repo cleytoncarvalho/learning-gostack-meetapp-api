@@ -4,6 +4,7 @@ import { Op } from 'sequelize';
 
 import Meetup from '../models/Meetup';
 import User from '../models/User';
+import File from '../models/File';
 
 class MeetupController {
   async index(req, res) {
@@ -30,6 +31,10 @@ class MeetupController {
         {
           model: User,
           attributes: ['id', 'name', 'email'],
+        },
+        {
+          model: File,
+          attributes: ['id', 'path', 'url'],
         },
       ],
       limit: per_page,
