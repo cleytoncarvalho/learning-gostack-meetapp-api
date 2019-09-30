@@ -34,5 +34,6 @@ routes.get('/organizing/:id', OrganizingController.show);
 
 routes.get('/subscriptions', SubscriptionController.index);
 routes.post('/subscriptions/:id', SubscriptionController.store);
+routes.delete('/subscriptions/:id', SubscriptionController.delete);
 
 export default routes;

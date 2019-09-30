@@ -5,6 +5,7 @@ import { Op } from 'sequelize';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
 import File from '../models/File';
+import Subscription from '../models/Subscription';
 
 class MeetupController {
   async index(req, res) {
@@ -36,10 +37,21 @@ class MeetupController {
           model: File,
           attributes: ['id', 'path', 'url'],
         },
+        {
+          model: Subscription,
+          required: false,
+          where: {
+            user_id: req.userId,
+          },
+        },
       ],
       limit: per_page,
       offset: per_page * page - per_page,
-      order: [['date', 'DESC']],
+      order: [['date', 'ASC']],
+    }).map(m => {
+      m.set('subscribed', m.Subscriptions.length > 0);
+
+      return m;
     });
 
     return res.json({

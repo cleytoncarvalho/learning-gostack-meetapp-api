@@ -3,31 +3,70 @@ import { Op } from 'sequelize';
 import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
+import File from '../models/File';
 
 import Queue from '../../lib/Queue';
 import SubscriptionMail from '../jobs/SubscriptionMail';
 
 class SubscriptionController {
   async index(req, res) {
-    const subscriptions = await Subscription.findAll({
-      where: {
-        user_id: req.userId,
+    const where = { user_id: req.userId };
+    const whereMeetup = {
+      date: {
+        [Op.gt]: new Date(),
       },
+    };
+
+    const page = req.query.page || 1;
+    const per_page = req.query.per_page || 10;
+
+    const totalSubscriptions = await Subscription.count({
+      where,
       include: [
         {
           model: Meetup,
-          where: {
-            date: {
-              [Op.gt]: new Date(),
-            },
-          },
           required: true,
+          where: whereMeetup,
         },
       ],
+    });
+
+    const totalPages =
+      totalSubscriptions > per_page
+        ? Math.ceil(totalSubscriptions / per_page)
+        : 1;
+
+    const subscriptions = await Subscription.findAll({
+      where,
+      include: [
+        {
+          model: Meetup,
+          required: true,
+          where: whereMeetup,
+          include: [
+            {
+              model: User,
+              attributes: ['id', 'name', 'email'],
+            },
+            {
+              model: File,
+              attributes: ['id', 'path', 'url'],
+            },
+          ],
+        },
+      ],
+      limit: per_page,
+      offset: per_page * page - per_page,
       order: [[Meetup, 'date']],
     });
 
-    return res.json(subscriptions);
+    return res.json({
+      subscriptions,
+      pagination: {
+        pages: totalPages,
+        total: totalSubscriptions,
+      },
+    });
   }
 
   async store(req, res) {
@@ -100,6 +139,37 @@ class SubscriptionController {
     });
 
     return res.json(subscription);
+  }
+
+  async delete(req, res) {
+    const user_id = req.userId;
+
+    const subscription = await Subscription.findOne({
+      where: {
+        meetup_id: req.params.id,
+        user_id,
+      },
+      include: [
+        {
+          model: Meetup,
+          required: true,
+        },
+      ],
+    });
+
+    if (!subscription) {
+      return res.status(404).json({ error: 'Subscription not found' });
+    }
+
+    if (subscription.Meetup.past) {
+      return res
+        .status(400)
+        .json({ error: "Can't unsubscribe to past meetups" });
+    }
+
+    await subscription.destroy();
+
+    return res.json();
   }
 }
 
