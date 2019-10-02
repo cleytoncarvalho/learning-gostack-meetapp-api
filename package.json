@@ -1,7 +1,7 @@
 {
-  "name": "Meetapp",
+  "name": "meetapp-app",
   "version": "1.0.0",
-  "description": "Agregador de eventos para desenvolvedores",
+  "description": "",
   "main": "index.js",
   "author": "Cleyton Carvalho",
   "license": "MIT",
