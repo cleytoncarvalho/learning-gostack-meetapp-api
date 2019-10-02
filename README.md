@@ -1,6 +1,6 @@
 # Meetapp
 
-Final NodeJS project developed at the GoStack bootcamp. API of the application for meetups appointments.
+Final NodeJS project developed at the GoStack bootcamp. API of the application for meetup appointments.
 
 Techs:
 
